@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node -r dotenv/config src/index.ts",
-    "compile": "tsc",
+    "build": "tsc",
     "serve": "node -r dotenv/config dist/index.js",
-    "start": "npm run compile && npm run serve",
+    "start": "npm run build && npm run serve",
     "watch": "nodemon"
   },
   "devDependencies": {
