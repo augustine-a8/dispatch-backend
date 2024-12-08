@@ -13,6 +13,16 @@ const UserRepository = AppDataSource.getRepository(User);
 async function addNewMail(req: Request, res: Response) {
   const { referenceNumber, addressees, organization } = req.body;
 
+  const existingMailWithReferenceNumber = await MailRepository.find({
+    where: { referenceNumber },
+  });
+  if (existingMailWithReferenceNumber.length > 0) {
+    res.status(400).json({
+      message: "Mail with reference number already exists",
+    });
+    return;
+  }
+
   const promises = addressees.map(async (addressee: string) => {
     const mail = new Mail();
     mail.mailId = uuidv4();
@@ -25,7 +35,7 @@ async function addNewMail(req: Request, res: Response) {
 
     const mailLog = new MailLog();
     mailLog.mailLogId = uuidv4();
-    mailLog.updatedAt = new Date();
+    mailLog.date = new Date();
     mailLog.mailId = savedMail.mailId;
     mailLog.status = MailStatus.PENDING;
     await MailLogRepository.save(mailLog);
@@ -44,10 +54,10 @@ async function addNewMail(req: Request, res: Response) {
 async function getAllMails(req: Request, res: Response) {
   const { start = 1, limit = 10, search = "" } = req.query;
   const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(start as string, 10);
+  const pageSize = parseInt(limit as string, 10);
   const searchTerm = search as string;
 
-  const [mails, totalMails] = await MailRepository.findAndCount({
+  const [mails, total] = await MailRepository.findAndCount({
     where: [
       { organization: ILike(`%${searchTerm}%`) },
       { addressee: ILike(`%${search}%`) },
@@ -60,7 +70,7 @@ async function getAllMails(req: Request, res: Response) {
     take: pageSize,
   });
 
-  const end = Math.min(totalMails, startNumber + pageSize - 1);
+  const end = Math.min(total, startNumber + pageSize - 1);
 
   res.status(200).json({
     message: "All mails retrieved",
@@ -68,7 +78,7 @@ async function getAllMails(req: Request, res: Response) {
     meta: {
       start: startNumber,
       end,
-      totalMails,
+      total,
     },
   });
 }
@@ -127,7 +137,7 @@ async function dispatchMail(req: Request, res: Response) {
       mailLog.mailLogId = uuidv4();
       mailLog.mailId = mail.mailId;
       mailLog.status = MailStatus.TRANSIT;
-      mailLog.updatedAt = new Date();
+      mailLog.date = new Date();
 
       await mailLog.save();
     });
@@ -179,7 +189,7 @@ async function receiveMail(req: Request, res: Response) {
     mailLog.mailLogId = uuidv4();
     mailLog.mailId = mail.mailId;
     mailLog.status = MailStatus.DELIVERED;
-    mailLog.updatedAt = new Date();
+    mailLog.date = new Date();
 
     await mailLog.save();
   });
@@ -269,7 +279,4 @@ export {
   getMailByReferenceNumber,
   dispatchMail,
   receiveMail,
-  addNewDriver,
-  getAllMailsForDriver,
-  getAllDrivers,
 };

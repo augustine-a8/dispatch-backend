@@ -45,20 +45,25 @@ export class Mail extends BaseEntity {
   @JoinColumn({ name: "driver_id", referencedColumnName: "userId" })
   driver: User;
 
-  @Column({ type: "varchar", length: 155 })
-  receipient: string;
+  @Column({ type: "varchar", length: 155, nullable: true })
+  receipient: string | null;
 
-  @Column({ type: "varchar", length: 10, name: "receipient_contact" })
-  receipientContact: string;
+  @Column({
+    type: "varchar",
+    length: 10,
+    name: "receipient_contact",
+    nullable: true,
+  })
+  receipientContact: string | null;
 
   @Column({ type: "timestamp", nullable: true, name: "received_at" })
   receivedAt: Date | null;
 
-  @Column({ type: "text", name: "receipient_signature_url" })
-  receipientSignatureUrl: string; // conversations on monday
+  @Column({ type: "text", name: "receipient_signature_url", nullable: true })
+  receipientSignatureUrl: string | null; // conversations on monday
 
-  @CreateDateColumn({ name: "created_at" })
-  createdAt: Date;
+  @CreateDateColumn({ name: "created_at", nullable: true })
+  createdAt: Date | null;
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;

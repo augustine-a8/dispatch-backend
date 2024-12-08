@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 import { createRoutes } from "./routes";
 import { mailEndpoint } from "./routes/mail.route";
+import { driverEndpoint } from "./routes/driver.route";
 import { errorHandler } from "./middleware";
 import { Endpoint } from "./types";
 
@@ -37,7 +38,7 @@ function createServer(): express.Express {
     });
   });
 
-  const endpoints: Endpoint[] = [mailEndpoint];
+  const endpoints: Endpoint[] = [mailEndpoint, driverEndpoint];
 
   createRoutes(app, endpoints);
 

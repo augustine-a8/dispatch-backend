@@ -16,8 +16,9 @@ const AppDataSource = new DataSource({
   username,
   password,
   port,
+  entities: [__dirname + "/entities/*.{ts,js}"],
+  synchronize: true,
   logging: ["query", "error", "warn", "schema"],
-  entities: [__dirname + "/entities/*.{ts, js}"],
 });
 
 export { AppDataSource };
