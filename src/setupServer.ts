@@ -12,6 +12,7 @@ import { driverEndpoint } from "./routes/driver.route";
 import { errorHandler } from "./middleware";
 import { Endpoint } from "./types";
 import { swaggerOptions } from "./swagger";
+import { authEndpoint } from "./routes/auth.route";
 
 function createServer(): express.Express {
   const app = express();
@@ -44,7 +45,7 @@ function createServer(): express.Express {
     });
   });
 
-  const endpoints: Endpoint[] = [mailEndpoint, driverEndpoint];
+  const endpoints: Endpoint[] = [mailEndpoint, driverEndpoint, authEndpoint];
 
   createRoutes(app, endpoints);
 

@@ -1,13 +1,9 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../types";
 
-export function isRegistrar(
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) {
+export function isAdmin(req: AuthRequest, res: Response, next: NextFunction) {
   const user = req.user;
-  if (user.role !== "registrar") {
+  if (user.role !== "admin") {
     res.status(403).json({
       message: "Action not allowed",
     });

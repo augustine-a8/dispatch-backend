@@ -18,10 +18,16 @@ export class User extends BaseEntity {
   @Column({ type: "varchar", length: 255 })
   name: string;
 
-  @Column({ type: "varchar", length: 10, nullable: true })
+  @Column({ type: "varchar", length: 255, unique: true, nullable: false })
+  username: string;
+
+  @Column({ type: "text" })
+  password: string;
+
+  @Column({ type: "varchar", nullable: false, unique: true })
   contact: string | null;
 
-  @Column({ type: "enum", enum: ["driver", "admin"] })
+  @Column({ type: "enum", enum: ["driver", "admin"], default: "driver" })
   role: "driver" | "admin";
 
   @CreateDateColumn({ name: "created_at" })

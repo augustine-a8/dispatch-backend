@@ -8,6 +8,7 @@ import {
 import { validateRequest } from "../middleware";
 import { addNewDriverSchema } from "../validations";
 import { Endpoint } from "../types";
+import { checkAuthentication } from "../middleware/checkAuth";
 
 const router = Router();
 
@@ -38,7 +39,7 @@ const router = Router();
  *       500:
  *         description: Internal server error.
  */
-router.get("/", asyncHandler(getAllDrivers));
+router.get("/", checkAuthentication, asyncHandler(getAllDrivers));
 
 /**
  * @swagger
@@ -91,6 +92,7 @@ router.get("/", asyncHandler(getAllDrivers));
  */
 router.post(
   "/",
+  checkAuthentication,
   validateRequest(addNewDriverSchema),
   asyncHandler(addNewDriver)
 );
@@ -138,7 +140,11 @@ router.post(
  *                   description: Error message.
  *                   example: "Driver with the provided ID not found"
  */
-router.get("/:id/mails", asyncHandler(getAllMailsForDriver));
+router.get(
+  "/:id/mails",
+  checkAuthentication,
+  asyncHandler(getAllMailsForDriver)
+);
 
 const driverEndpoint: Endpoint = {
   path: "/drivers",

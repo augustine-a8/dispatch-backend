@@ -11,6 +11,7 @@
     "serve": "npx cross-env NODE_ENV=production node -r dotenv/config dist/index.js",
     "serve:dev": "node -r dotenv/config dist/index.js",
     "start": "npm run build && npm run serve",
+    "start:dev": "npm run build && npm run serve:dev",
     "watch": "nodemon"
   },
   "devDependencies": {

@@ -15,7 +15,7 @@ import { checkAuthentication } from "../middleware/checkAuth";
 import { validateRequest } from "../middleware/validateRequest";
 import { Endpoint } from "../types";
 import { asyncHandler } from "../lib/asyncWrapper";
-import { isRegistrar } from "../middleware/isRegistrar";
+import { isAdmin } from "../middleware/isAdmin";
 
 const router = Router();
 
@@ -72,7 +72,7 @@ const router = Router();
  *                   description: Error message.
  *                   example: "Error fetching mails"
  */
-router.get("/", asyncHandler(getAllMails));
+router.get("/", checkAuthentication, isAdmin, asyncHandler(getAllMails));
 
 /**
  * @swagger
@@ -131,7 +131,13 @@ router.get("/", asyncHandler(getAllMails));
  *                   description: Error message.
  *                   example: "Mail with reference number already exists"
  */
-router.post("/", validateRequest(addNewMailSchema), asyncHandler(addNewMail));
+router.post(
+  "/",
+  checkAuthentication,
+  isAdmin,
+  validateRequest(addNewMailSchema),
+  asyncHandler(addNewMail)
+);
 
 /**
  * @swagger
@@ -184,6 +190,8 @@ router.post("/", validateRequest(addNewMailSchema), asyncHandler(addNewMail));
  */
 router.post(
   "/dispatch",
+  checkAuthentication,
+  isAdmin,
   validateRequest(dispatchMailSchema),
   asyncHandler(dispatchMail)
 );
@@ -248,6 +256,7 @@ router.post(
  */
 router.post(
   "/:referenceNumber/receive",
+  checkAuthentication,
   validateRequest(receiveMailSchema),
   asyncHandler(receiveMail)
 );
