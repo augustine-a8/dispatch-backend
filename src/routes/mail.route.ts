@@ -21,7 +21,7 @@ const router = Router();
 
 /**
  * @swagger
- * /mails:
+ * /api/mails:
  *   get:
  *     summary: Get all mail records
  *     description: Retrieves all mail records from the database with additional metadata.
@@ -76,7 +76,7 @@ router.get("/", asyncHandler(getAllMails));
 
 /**
  * @swagger
- * /mails:
+ * /api/mails:
  *   post:
  *     summary: Add a new mail entry
  *     description: Adds a new mail entry to the database if the reference number is unique.
@@ -135,7 +135,7 @@ router.post("/", validateRequest(addNewMailSchema), asyncHandler(addNewMail));
 
 /**
  * @swagger
- * /mails/dispatch:
+ * /api/mails/dispatch:
  *   post:
  *     summary: Dispatch mails to a driver
  *     description: Assigns mails to a driver using their ID and a list of reference numbers. Updates mail status to dispatched.
@@ -190,7 +190,7 @@ router.post(
 
 /**
  * @swagger
- * /mails/{referenceNumber}/receive:
+ * /api/mails/{referenceNumber}/receive:
  *   post:
  *     summary: Mark a mail as received
  *     description: Updates the status of a mail to 'Received' and records recipient details.
@@ -254,7 +254,7 @@ router.post(
 
 /**
  * @swagger
- * /mails/{referenceNumber}:
+ * /api/mails/{referenceNumber}:
  *   get:
  *     summary: Get mail by reference number
  *     description: Retrieves mail details and logs using a unique reference number.

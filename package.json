@@ -9,6 +9,7 @@
     "dev": "ts-node -r dotenv/config src/index.ts",
     "build": "tsc",
     "serve": "npx cross-env NODE_ENV=production node -r dotenv/config dist/index.js",
+    "serve:dev": "node -r dotenv/config dist/index.js",
     "start": "npm run build && npm run serve",
     "watch": "nodemon"
   },

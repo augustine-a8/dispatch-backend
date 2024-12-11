@@ -9,4 +9,5 @@ export const config: IConfig = {
   databasePassword: String(process.env.DATABASE_PASSWORD),
   accessTokenSecret: String(process.env.ACCESS_TOKEN_SECRET),
   refreshTokenSecret: String(process.env.REFRESH_TOKEN_SECRET),
+  serverUrl: String(process.env.SERVER_URL),
 };

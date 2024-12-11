@@ -7,4 +7,5 @@ export interface IConfig {
   port: number;
   refreshTokenSecret: string;
   accessTokenSecret: string;
+  serverUrl: string;
 }

@@ -11,7 +11,11 @@ export const swaggerOptions: Options = {
     },
     servers: [
       {
-        url: `http://localhost:${config.port}`, // Replace with your server URL
+        url: `${
+          process.env.NODE_ENV === "production"
+            ? config.serverUrl
+            : "http://localhost"
+        }:${config.port}`,
         description: "Local server",
       },
     ],

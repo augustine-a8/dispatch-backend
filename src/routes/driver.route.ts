@@ -13,7 +13,7 @@ const router = Router();
 
 /**
  * @swagger
- * /drivers:
+ * /api/drivers:
  *   get:
  *     summary: Get all drivers
  *     description: Retrieves a list of all drivers from the database.
@@ -42,7 +42,7 @@ router.get("/", asyncHandler(getAllDrivers));
 
 /**
  * @swagger
- * /drivers:
+ * /api/drivers:
  *   post:
  *     summary: Add a new driver
  *     description: Creates a new driver entry in the database.
@@ -97,7 +97,7 @@ router.post(
 
 /**
  * @swagger
- * /drivers/{driverId}/mails:
+ * /api/drivers/{driverId}/mails:
  *   get:
  *     summary: Get all mails for a driver
  *     description: Retrieves all mail records assigned to a specific driver.
