@@ -61,7 +61,7 @@ async function login(req: Request, res: Response) {
 }
 
 async function register(req: Request, res: Response) {
-  const { name, username, password, contact } = req.body;
+  const { name, username, password, contact, role } = req.body;
 
   const existingUser = await UserRepository.findOneBy({ username });
   if (existingUser) {
@@ -77,6 +77,9 @@ async function register(req: Request, res: Response) {
   user.username = username;
   user.contact = contact;
   user.password = hashPassword(password);
+  if (role) {
+    user.role = role;
+  }
 
   const savedUser = await UserRepository.save(user);
   const authUser: IAuthUser = {
