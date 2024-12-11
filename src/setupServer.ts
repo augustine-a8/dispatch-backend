@@ -3,15 +3,19 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
 import { createRoutes } from "./routes";
 import { mailEndpoint } from "./routes/mail.route";
 import { driverEndpoint } from "./routes/driver.route";
 import { errorHandler } from "./middleware";
 import { Endpoint } from "./types";
+import { swaggerOptions } from "./swagger";
 
 function createServer(): express.Express {
   const app = express();
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
   const whitelist = [""];
   const corsOptionsDelegate = function (req: express.Request, callback: any) {
@@ -31,6 +35,8 @@ function createServer(): express.Express {
   app.use(cookieParser());
 
   app.use(errorHandler);
+
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   app.get("/welcome", (req: express.Request, res: express.Response) => {
     res.status(200).json({
