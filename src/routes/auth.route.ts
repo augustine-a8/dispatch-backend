@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../lib/asyncWrapper";
 import { Endpoint } from "../types";
-import { login, register } from "../controllers/auth.controller";
+import { login, refreshToken, register } from "../controllers/auth.controller";
 
 const router = Router();
 
@@ -114,6 +114,8 @@ router.post("/login", asyncHandler(login));
  *                   example: "Username has been taken"
  */
 router.post("/register", asyncHandler(register));
+
+router.post("/refresh-token", asyncHandler(refreshToken));
 
 const authEndpoint: Endpoint = {
   path: "/auth",
