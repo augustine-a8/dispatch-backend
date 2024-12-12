@@ -21,11 +21,11 @@ function createServer(): express.Express {
   const whitelist = [""];
   const corsOptionsDelegate = function (req: express.Request, callback: any) {
     let corsOptions;
-    if (whitelist.indexOf(req.header("Origin") as string) !== -1) {
-      corsOptions = { origin: true, credentials: true };
-    } else {
-      corsOptions = { origin: false, credentials: true };
-    }
+    corsOptions = { origin: true, credentials: true };
+    // if (whitelist.indexOf(req.header("Origin") as string) !== -1) {
+    // } else {
+    //   corsOptions = { origin: false, credentials: true };
+    // }
     callback(null, corsOptions);
   };
   app.use(cors(corsOptionsDelegate));
