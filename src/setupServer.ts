@@ -30,13 +30,9 @@ function createServer(): express.Express {
   // };
   // app.use(cors(corsOptionsDelegate));
 
-  app.use(
-    cors({
-      origin: "*", // Allow all origins
-      methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
-      allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
-    })
-  );
+  // app.use(
+  //   cors()
+  // );
 
   app.use(helmet());
   app.use(express.json());
