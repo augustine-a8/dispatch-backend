@@ -18,19 +18,19 @@ function createServer(): express.Express {
   const app = express();
   const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-  // const whitelist = [""];
-  // const corsOptionsDelegate = function (req: express.Request, callback: any) {
-  //   let corsOptions;
-  //   if (whitelist.indexOf(req.header("Origin") as string) !== -1) {
-  //     corsOptions = { origin: true, credentials: true };
-  //   } else {
-  //     corsOptions = { origin: false, credentials: true };
-  //   }
-  //   callback(null, corsOptions);
-  // };
-  // app.use(cors(corsOptionsDelegate));
+  const whitelist = [""];
+  const corsOptionsDelegate = function (req: express.Request, callback: any) {
+    let corsOptions;
+    if (whitelist.indexOf(req.header("Origin") as string) !== -1) {
+      corsOptions = { origin: true, credentials: true };
+    } else {
+      corsOptions = { origin: false, credentials: true };
+    }
+    callback(null, corsOptions);
+  };
+  app.use(cors(corsOptionsDelegate));
 
-  app.use(cors());
+  // app.use(cors());
 
   app.use(helmet());
   app.use(express.json());
