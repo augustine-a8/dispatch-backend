@@ -128,7 +128,7 @@ async function refreshToken(req: Request, res: Response) {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 120 * 60 * 1000,
     });
 
