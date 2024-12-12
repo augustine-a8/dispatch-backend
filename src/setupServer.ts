@@ -30,9 +30,7 @@ function createServer(): express.Express {
   // };
   // app.use(cors(corsOptionsDelegate));
 
-  // app.use(
-  //   cors()
-  // );
+  app.use(cors());
 
   app.use(helmet());
   app.use(express.json());
