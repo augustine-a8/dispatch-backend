@@ -81,7 +81,7 @@ async function getAllMailsForDriver(req: Request, res: Response) {
   }
 
   const driverMails = await MailRepository.find({
-    where: { driverId, status: mailStatus },
+    where: { driverId },
   });
 
   res.status(200).json({
