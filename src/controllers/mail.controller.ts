@@ -84,7 +84,8 @@ async function getAllMails(req: Request, res: Response) {
 }
 
 async function getMailByReferenceNumber(req: Request, res: Response) {
-  const { referenceNumber } = req.params;
+  const { ref } = req.query;
+  const referenceNumber = ref as string;
   const mail = await MailRepository.findOne({
     where: { referenceNumber },
     relations: {
@@ -158,8 +159,10 @@ async function dispatchMail(req: Request, res: Response) {
 }
 
 async function receiveMail(req: Request, res: Response) {
-  const { referenceNumber } = req.params;
+  const { ref } = req.query;
   const { receipient, receipientContact, receipientSignatureUrl } = req.body;
+
+  const referenceNumber = ref as string;
 
   const mails = await MailRepository.find({
     where: { referenceNumber },

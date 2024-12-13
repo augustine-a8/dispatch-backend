@@ -198,15 +198,15 @@ router.post(
 
 /**
  * @swagger
- * /api/mails/{referenceNumber}/receive:
+ * /api/mails/receive:
  *   post:
  *     summary: Mark a mail as received
  *     description: Updates the status of a mail to 'Received' and records recipient details.
  *     tags:
  *       - Mail
  *     parameters:
- *       - in: path
- *         name: referenceNumber
+ *       - in: query
+ *         name: ref
  *         required: true
  *         schema:
  *           type: string
@@ -255,7 +255,7 @@ router.post(
  *                   example: "Mail not found"
  */
 router.post(
-  "/:referenceNumber/receive",
+  "/receive",
   checkAuthentication,
   validateRequest(receiveMailSchema),
   asyncHandler(receiveMail)
@@ -263,15 +263,15 @@ router.post(
 
 /**
  * @swagger
- * /api/mails/{referenceNumber}:
+ * /api/mails/mail:
  *   get:
  *     summary: Get mail by reference number
  *     description: Retrieves mail details and logs using a unique reference number.
  *     tags:
  *       - Mail
  *     parameters:
- *       - in: path
- *         name: referenceNumber
+ *       - in: query
+ *         name: ref
  *         required: true
  *         schema:
  *           type: string
@@ -306,7 +306,7 @@ router.post(
  *                   description: Error message.
  *                   example: "Mail not found"
  */
-router.get("/:referenceNumber", asyncHandler(getMailByReferenceNumber));
+router.get("/mail", asyncHandler(getMailByReferenceNumber));
 
 const mailEndpoint: Endpoint = {
   path: "/mails",
