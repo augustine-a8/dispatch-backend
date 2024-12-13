@@ -51,18 +51,25 @@ async function addNewDriver(req: Request, res: Response) {
     return;
   }
 
+  const generatedPassword = generatePassword(8);
+  const generatedUsername = generateUsername(name);
+
   const driver = new User();
   driver.userId = uuidv4();
   driver.name = name;
   driver.contact = contact;
   driver.role = "driver";
-  driver.password = hashPassword(generatePassword(8));
-  driver.username = generateUsername(name);
-  const savedDriver = await UserRepository.save(driver);
+  driver.password = hashPassword(generatedPassword);
+  driver.username = generatedUsername;
+
+  await UserRepository.save(driver);
 
   res.status(200).json({
     message: "New driver added",
-    driver: savedDriver,
+    driver: {
+      username: generateUsername,
+      password: generatedPassword,
+    },
   });
 }
 
