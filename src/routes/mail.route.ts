@@ -3,7 +3,7 @@ import {
   addNewMail,
   dispatchMail,
   getAllMails,
-  getMailByReferenceNumber,
+  getMailById,
   receiveMail,
 } from "../controllers/mail.controller";
 import {
@@ -198,7 +198,7 @@ router.post(
 
 /**
  * @swagger
- * /api/mails/receive:
+ * /api/mails/{mailId}/receive:
  *   post:
  *     summary: Mark a mail as received
  *     description: Updates the status of a mail to 'Received' and records recipient details.
@@ -255,7 +255,7 @@ router.post(
  *                   example: "Mail not found"
  */
 router.post(
-  "/receive",
+  "/:id/receive",
   checkAuthentication,
   validateRequest(receiveMailSchema),
   asyncHandler(receiveMail)
@@ -263,19 +263,19 @@ router.post(
 
 /**
  * @swagger
- * /api/mails/mail:
+ * /api/mails/{mailId}:
  *   get:
  *     summary: Get mail by reference number
  *     description: Retrieves mail details and logs using a unique reference number.
  *     tags:
  *       - Mail
  *     parameters:
- *       - in: query
- *         name: ref
+ *       - in: params
+ *         name: mailId
  *         required: true
  *         schema:
  *           type: string
- *         description: The reference number of the mail.
+ *         description: MailId of the mail.
  *     responses:
  *       200:
  *         description: Mail and log details retrieved successfully.
@@ -306,7 +306,7 @@ router.post(
  *                   description: Error message.
  *                   example: "Mail not found"
  */
-router.get("/mail", asyncHandler(getMailByReferenceNumber));
+router.get("/:id", asyncHandler(getMailById));
 
 const mailEndpoint: Endpoint = {
   path: "/mails",

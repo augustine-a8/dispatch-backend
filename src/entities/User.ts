@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 
-@Entity({ name: "driver" })
+@Entity({ name: "user" })
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: string;

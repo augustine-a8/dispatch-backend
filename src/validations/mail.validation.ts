@@ -8,10 +8,7 @@ const addNewMailSchema = Joi.object({
 
 const dispatchMailSchema = Joi.object({
   driverId: Joi.string().uuid().required(),
-  referenceNumbers: Joi.array()
-    .items(Joi.string().required())
-    .min(1)
-    .required(),
+  mailIds: Joi.array().items(Joi.string().uuid().required()).min(1).required(),
 });
 
 const receiveMailSchema = Joi.object({

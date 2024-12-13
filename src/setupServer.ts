@@ -8,7 +8,7 @@ import swaggerJsdoc from "swagger-jsdoc";
 
 import { createRoutes } from "./routes";
 import { mailEndpoint } from "./routes/mail.route";
-import { driverEndpoint } from "./routes/driver.route";
+import { driverEndpoint } from "./routes/user.route";
 import { errorHandler } from "./middleware";
 import { Endpoint } from "./types";
 import { swaggerOptions } from "./swagger";

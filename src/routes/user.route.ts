@@ -4,11 +4,13 @@ import {
   addNewDriver,
   getAllDrivers,
   getAllMailsForDriver,
-} from "../controllers/driver.controller";
+  getDriverById,
+} from "../controllers/user.controller";
 import { validateRequest } from "../middleware";
 import { addNewDriverSchema } from "../validations";
 import { Endpoint } from "../types";
 import { checkAuthentication } from "../middleware/checkAuth";
+import { isAdmin } from "../middleware/isAdmin";
 
 const router = Router();
 
@@ -145,6 +147,8 @@ router.get(
   checkAuthentication,
   asyncHandler(getAllMailsForDriver)
 );
+
+router.get("/:id", checkAuthentication, isAdmin, asyncHandler(getDriverById));
 
 const driverEndpoint: Endpoint = {
   path: "/drivers",

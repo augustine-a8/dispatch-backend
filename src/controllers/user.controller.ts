@@ -38,6 +38,32 @@ async function getAllDrivers(req: Request, res: Response) {
   });
 }
 
+async function getDriverById(req: Request, res: Response) {
+  const { id: driverId } = req.params;
+
+  const driver = await UserRepository.findOne({
+    where: {
+      role: "driver",
+      userId: driverId,
+    },
+  });
+
+  if (!driver) {
+    res.status(404).json({
+      message: "No driver with id found",
+    });
+    return;
+  }
+
+  const driverMails = await MailRepository.find({ where: { driverId } });
+
+  res.status(200).json({
+    message: "Driver details retrieved",
+    driver,
+    mails: driverMails,
+  });
+}
+
 async function addNewDriver(req: Request, res: Response) {
   const { name, contact } = req.body;
 
@@ -51,23 +77,22 @@ async function addNewDriver(req: Request, res: Response) {
     return;
   }
 
-  const generatedPassword = generatePassword(8);
   const generatedUsername = generateUsername(name);
+  const generatedPassword = generatePassword(8);
 
   const driver = new User();
   driver.userId = uuidv4();
   driver.name = name;
   driver.contact = contact;
   driver.role = "driver";
-  driver.password = hashPassword(generatedPassword);
   driver.username = generatedUsername;
-
-  await UserRepository.save(driver);
+  driver.password = hashPassword(generatedPassword);
+  const savedDriver = await UserRepository.save(driver);
 
   res.status(200).json({
     message: "New driver added",
     driver: {
-      username: generateUsername,
+      username: generatedUsername,
       password: generatedPassword,
     },
   });
@@ -75,9 +100,6 @@ async function addNewDriver(req: Request, res: Response) {
 
 async function getAllMailsForDriver(req: Request, res: Response) {
   const { id: driverId } = req.params;
-  const { status = "pending" } = req.query;
-
-  const mailStatus = status as MailStatus;
 
   const driver = await UserRepository.findOne({ where: { userId: driverId } });
   if (!driver) {
@@ -87,9 +109,7 @@ async function getAllMailsForDriver(req: Request, res: Response) {
     return;
   }
 
-  const driverMails = await MailRepository.find({
-    where: { driverId },
-  });
+  const driverMails = await MailRepository.find({ where: { driverId } });
 
   res.status(200).json({
     message: "All mails for driver retrieved",
@@ -97,4 +117,4 @@ async function getAllMailsForDriver(req: Request, res: Response) {
   });
 }
 
-export { getAllDrivers, getAllMailsForDriver, addNewDriver };
+export { getAllDrivers, getAllMailsForDriver, addNewDriver, getDriverById };

@@ -23,31 +23,25 @@ async function addNewMail(req: Request, res: Response) {
     return;
   }
 
-  const promises = addressees.map(async (addressee: string) => {
-    const mail = new Mail();
-    mail.mailId = uuidv4();
-    mail.addressee = addressee;
-    mail.referenceNumber = referenceNumber;
-    mail.organization = organization;
-    mail.date = new Date();
-    mail.status = MailStatus.PENDING;
-    const savedMail = await MailRepository.save(mail);
+  const mail = new Mail();
+  mail.mailId = uuidv4();
+  mail.addressee = (addressees as string[]).join(",");
+  mail.referenceNumber = referenceNumber;
+  mail.organization = organization;
+  mail.date = new Date();
+  mail.status = MailStatus.PENDING;
+  const savedMail = await MailRepository.save(mail);
 
-    const mailLog = new MailLog();
-    mailLog.mailLogId = uuidv4();
-    mailLog.date = new Date();
-    mailLog.mailId = savedMail.mailId;
-    mailLog.status = MailStatus.PENDING;
-    await MailLogRepository.save(mailLog);
-
-    return savedMail;
-  });
-
-  const savedMails = await Promise.all(promises);
+  const mailLog = new MailLog();
+  mailLog.mailLogId = uuidv4();
+  mailLog.date = new Date();
+  mailLog.mailId = savedMail.mailId;
+  mailLog.status = MailStatus.PENDING;
+  await MailLogRepository.save(mailLog);
 
   res.status(200).json({
     message: "New mail added",
-    savedMails,
+    mail: savedMail,
   });
 }
 
@@ -83,11 +77,10 @@ async function getAllMails(req: Request, res: Response) {
   });
 }
 
-async function getMailByReferenceNumber(req: Request, res: Response) {
-  const { ref } = req.query;
-  const referenceNumber = ref as string;
+async function getMailById(req: Request, res: Response) {
+  const { id: mailId } = req.params;
   const mail = await MailRepository.findOne({
-    where: { referenceNumber },
+    where: { mailId },
     relations: {
       driver: true,
     },
@@ -103,7 +96,7 @@ async function getMailByReferenceNumber(req: Request, res: Response) {
   const mailLogs = await MailLogRepository.find({
     relations: { mail: true },
     where: {
-      mail: { referenceNumber },
+      mail: { mailId },
     },
   });
 
@@ -115,7 +108,7 @@ async function getMailByReferenceNumber(req: Request, res: Response) {
 }
 
 async function dispatchMail(req: Request, res: Response) {
-  const { driverId, referenceNumbers } = req.body;
+  const { driverId, mailIds } = req.body;
 
   const driver = await UserRepository.findOne({ where: { userId: driverId } });
   if (!driver) {
@@ -125,31 +118,34 @@ async function dispatchMail(req: Request, res: Response) {
     return;
   }
 
-  const promises = referenceNumbers.map(async (referenceNumber: string) => {
-    const mails = await MailRepository.find({ where: { referenceNumber } });
+  const promises = mailIds.map(async (mailId: string) => {
+    const mail = await MailRepository.findOne({ where: { mailId } });
 
-    await MailRepository.update(
-      { referenceNumber },
-      { status: MailStatus.TRANSIT, driverId }
-    );
+    if (!mail) {
+      res.status(404).json({
+        message: `No mail with id: ${mailId}`,
+      });
+      return;
+    }
 
-    mails.forEach(async (mail) => {
-      const mailLog = new MailLog();
-      mailLog.mailLogId = uuidv4();
-      mailLog.mailId = mail.mailId;
-      mailLog.status = MailStatus.TRANSIT;
-      mailLog.date = new Date();
+    mail.status = MailStatus.TRANSIT;
+    mail.driverId = driverId;
+    await mail.save();
 
-      await mailLog.save();
-    });
+    const mailLog = new MailLog();
+    mailLog.mailLogId = uuidv4();
+    mailLog.mailId = mail.mailId;
+    mailLog.status = MailStatus.TRANSIT;
+    mailLog.date = new Date();
+    await mailLog.save();
 
-    return referenceNumber;
+    return mailId;
   });
 
   const promiseResults = await Promise.all(promises);
   const successfulDispatches = promiseResults.filter((item) => item);
-  const failedDispatches = referenceNumbers.filter(
-    (referenceNumber: string) => !successfulDispatches.includes(referenceNumber)
+  const failedDispatches = mailIds.filter(
+    (mailId: string) => !successfulDispatches.includes(mailId)
   );
 
   res.status(200).json({
@@ -159,127 +155,40 @@ async function dispatchMail(req: Request, res: Response) {
 }
 
 async function receiveMail(req: Request, res: Response) {
-  const { ref } = req.query;
+  const { mailId } = req.params;
   const { receipient, receipientContact, receipientSignatureUrl } = req.body;
 
-  const referenceNumber = ref as string;
-
-  const mails = await MailRepository.find({
-    where: { referenceNumber },
+  const mail = await MailRepository.findOne({
+    where: { mailId },
     relations: {
       driver: true,
     },
   });
-  if (mails.length === 0) {
+  if (!mail) {
     res.status(404).json({
-      message: "No mails with reference number",
+      message: "No mail with id provided",
     });
     return;
   }
 
-  await MailRepository.update(
-    { referenceNumber },
-    {
-      receipient,
-      receipientContact,
-      receipientSignatureUrl,
-      status: MailStatus.DELIVERED,
-    }
-  );
+  mail.receipient = receipient;
+  mail.receipientContact = receipientContact;
+  mail.receipientSignatureUrl = receipientSignatureUrl;
+  mail.receipientContact = receipientContact;
+  mail.status = MailStatus.DELIVERED;
+  const updatedMail = await mail.save();
 
-  mails.forEach(async (mail) => {
-    const mailLog = new MailLog();
-    mailLog.mailLogId = uuidv4();
-    mailLog.mailId = mail.mailId;
-    mailLog.status = MailStatus.DELIVERED;
-    mailLog.date = new Date();
+  const mailLog = new MailLog();
+  mailLog.mailLogId = uuidv4();
+  mailLog.mailId = mail.mailId;
+  mailLog.status = MailStatus.DELIVERED;
+  mailLog.date = new Date();
+  await mailLog.save();
 
-    await mailLog.save();
-  });
-
-  // TODO: Add to response object
   res.status(200).json({
     message: "Mail received",
+    mail: updatedMail,
   });
 }
 
-async function getAllDrivers(req: Request, res: Response) {
-  const { start = 1, limit = 10, search = "" } = req.query;
-  const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(limit as string, 10);
-  const searchTerm = search as string;
-
-  const [drivers, total] = await UserRepository.findAndCount({
-    where: [
-      { role: "driver", name: ILike(`%${searchTerm}%`) },
-      { role: "driver", contact: ILike(`%${searchTerm}%`) },
-    ],
-    skip: startNumber - 1,
-    take: pageSize,
-  });
-
-  const end = Math.min(total, startNumber + pageSize - 1);
-
-  res.status(200).json({
-    message: "retrieved all drivers",
-    drivers,
-    meta: {
-      total,
-      start: startNumber,
-      end,
-    },
-  });
-}
-
-async function addNewDriver(req: Request, res: Response) {
-  const { name, contact } = req.body;
-
-  const existingDriver = await UserRepository.find({
-    where: [{ name }, { contact }],
-  });
-  if (existingDriver.length > 0) {
-    res.status(400).json({
-      message: "Driver with name/contact already exists",
-    });
-    return;
-  }
-
-  const driver = new User();
-  driver.userId = uuidv4();
-  driver.name = name;
-  driver.contact = contact;
-  driver.role = "driver";
-  const savedDriver = await UserRepository.save(driver);
-
-  res.status(200).json({
-    message: "New driver added",
-    driver: savedDriver,
-  });
-}
-
-async function getAllMailsForDriver(req: Request, res: Response) {
-  const { id: driverId } = req.params;
-
-  const driver = await UserRepository.findOne({ where: { userId: driverId } });
-  if (!driver) {
-    res.status(404).json({
-      message: "Driver with id provided not found",
-    });
-    return;
-  }
-
-  const driverMails = await MailRepository.find({ where: { driverId } });
-
-  res.status(200).json({
-    message: "All mails for driver retrieved",
-    driverMails,
-  });
-}
-
-export {
-  addNewMail,
-  getAllMails,
-  getMailByReferenceNumber,
-  dispatchMail,
-  receiveMail,
-};
+export { addNewMail, getAllMails, getMailById, dispatchMail, receiveMail };
