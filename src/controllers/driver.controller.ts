@@ -4,6 +4,8 @@ import { Response, Request } from "express";
 import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
 import { ILike } from "typeorm";
+import { MailStatus } from "../types/mail";
+import { generatePassword, generateUsername, hashPassword } from "../lib/util";
 
 const MailRepository = AppDataSource.getRepository(Mail);
 const UserRepository = AppDataSource.getRepository(User);
@@ -54,6 +56,8 @@ async function addNewDriver(req: Request, res: Response) {
   driver.name = name;
   driver.contact = contact;
   driver.role = "driver";
+  driver.password = hashPassword(generatePassword(8));
+  driver.username = generateUsername(name);
   const savedDriver = await UserRepository.save(driver);
 
   res.status(200).json({
@@ -64,6 +68,9 @@ async function addNewDriver(req: Request, res: Response) {
 
 async function getAllMailsForDriver(req: Request, res: Response) {
   const { id: driverId } = req.params;
+  const { status = "pending" } = req.query;
+
+  const mailStatus = status as MailStatus;
 
   const driver = await UserRepository.findOne({ where: { userId: driverId } });
   if (!driver) {
@@ -73,7 +80,9 @@ async function getAllMailsForDriver(req: Request, res: Response) {
     return;
   }
 
-  const driverMails = await MailRepository.find({ where: { driverId } });
+  const driverMails = await MailRepository.find({
+    where: { driverId, status: mailStatus },
+  });
 
   res.status(200).json({
     message: "All mails for driver retrieved",

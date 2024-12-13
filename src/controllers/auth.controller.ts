@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 import { AppDataSource } from "../dataSource";
 import { User } from "../entities";
-import { hashPassword, verifyPassword } from "../lib/password";
+import { hashPassword, verifyPassword } from "../lib/util";
 import { generateToken, generateRefreshToken } from "../lib/jwt";
 import { config } from "../config";
 import { IAuthUser } from "../types/auth";
