@@ -4,11 +4,47 @@ import { Response, Request } from "express";
 import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
 import { MailStatus } from "../types/mail";
-import { ILike } from "typeorm";
+import { Between, ILike } from "typeorm";
 
 const MailRepository = AppDataSource.getRepository(Mail);
 const MailLogRepository = AppDataSource.getRepository(MailLog);
 const UserRepository = AppDataSource.getRepository(User);
+
+async function getMailOverview(req: Request, res: Response) {
+  const { date = "" } = req.query;
+  const startDate = new Date(`${date}T00:00:00.000Z`);
+  const endDate = new Date(`${date}T23:59:59.999Z`);
+
+  const all = await MailRepository.find({
+    where: { date: Between(new Date(startDate), new Date(endDate)) },
+  });
+  const delivered = await MailRepository.find({
+    where: {
+      status: MailStatus.DELIVERED,
+      date: Between(new Date(startDate), new Date(endDate)),
+    },
+  });
+  const transit = await MailRepository.find({
+    where: {
+      status: MailStatus.TRANSIT,
+      date: Between(new Date(startDate), new Date(endDate)),
+    },
+  });
+  const failed = await MailRepository.find({
+    where: {
+      status: MailStatus.FAILED,
+      date: Between(new Date(startDate), new Date(endDate)),
+    },
+  });
+
+  res.status(200).json({
+    message: "Mails overview retrieved",
+    totalMails: all.length,
+    deliveredMails: delivered.length,
+    transitMails: transit.length,
+    failedMails: failed.length,
+  });
+}
 
 async function addNewMail(req: Request, res: Response) {
   const { referenceNumber, addressees, organization } = req.body;
@@ -79,6 +115,7 @@ async function getAllMails(req: Request, res: Response) {
 
 async function getMailById(req: Request, res: Response) {
   const { id: mailId } = req.params;
+
   const mail = await MailRepository.findOne({
     where: { mailId },
     relations: {
@@ -93,17 +130,50 @@ async function getMailById(req: Request, res: Response) {
     return;
   }
 
-  const mailLogs = await MailLogRepository.find({
+  res.status(200).json({
+    message: "Mail and mail log retrieved",
+    mail,
+  });
+}
+
+async function getMailLogsForMailById(req: Request, res: Response) {
+  const { id: mailId } = req.params;
+  const { start = 1, limit = 10 } = req.query;
+  const startNumber = parseInt(start as string, 10);
+  const pageSize = parseInt(limit as string, 10);
+
+  const mail = await MailRepository.findOne({
+    where: { mailId },
+    relations: {
+      driver: true,
+    },
+  });
+
+  if (!mail) {
+    res.status(404).json({
+      message: "No mail with id provided",
+    });
+    return;
+  }
+
+  const [mailLogs, totalMailLogs] = await MailLogRepository.findAndCount({
     relations: { mail: true },
     where: {
       mail: { mailId },
     },
+    take: pageSize,
+    skip: startNumber - 1,
   });
+  const end = Math.min(totalMailLogs, startNumber + pageSize - 1);
 
   res.status(200).json({
-    message: "Mail and mail log retrieved",
-    mail,
+    message: "Maillogs retrieved",
     mailLogs,
+    meta: {
+      total: totalMailLogs,
+      start: startNumber,
+      end,
+    },
   });
 }
 
@@ -192,4 +262,12 @@ async function receiveMail(req: Request, res: Response) {
   });
 }
 
-export { addNewMail, getAllMails, getMailById, dispatchMail, receiveMail };
+export {
+  addNewMail,
+  getAllMails,
+  getMailById,
+  dispatchMail,
+  receiveMail,
+  getMailOverview,
+  getMailLogsForMailById,
+};

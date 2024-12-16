@@ -4,6 +4,8 @@ import {
   dispatchMail,
   getAllMails,
   getMailById,
+  getMailLogsForMailById,
+  getMailOverview,
   receiveMail,
 } from "../controllers/mail.controller";
 import {
@@ -73,6 +75,78 @@ const router = Router();
  *                   example: "Error fetching mails"
  */
 router.get("/", checkAuthentication, isAdmin, asyncHandler(getAllMails));
+
+/**
+ * @swagger
+ * /mails/overview:
+ *   get:
+ *     summary: Get mail overview for a specific date
+ *     description: Retrieve an overview of mails, including total, delivered, in transit, and failed mails for a specific date.
+ *     tags:
+ *       - Mail
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: The date for which the mail overview is retrieved (YYYY-MM-DD).
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the mail overview.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message.
+ *                   example: "Mails overview retrieved"
+ *                 totalMails:
+ *                   type: integer
+ *                   description: Total number of mails for the specified date.
+ *                   example: 50
+ *                 deliveredMails:
+ *                   type: integer
+ *                   description: Number of mails delivered on the specified date.
+ *                   example: 30
+ *                 transitMails:
+ *                   type: integer
+ *                   description: Number of mails in transit on the specified date.
+ *                   example: 15
+ *                 failedMails:
+ *                   type: integer
+ *                   description: Number of mails that failed delivery on the specified date.
+ *                   example: 5
+ *       400:
+ *         description: Invalid or missing date query parameter.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid date format. Please use YYYY-MM-DD."
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error retrieving mail overview."
+ */
+router.get(
+  "/overview",
+  checkAuthentication,
+  isAdmin,
+  asyncHandler(getMailOverview)
+);
 
 /**
  * @swagger
@@ -158,12 +232,12 @@ router.post(
  *                 type: string
  *                 description: ID of the driver to whom mails will be dispatched.
  *                 example: "driver123"
- *               referenceNumbers:
+ *               mailIds:
  *                 type: array
  *                 items:
  *                   type: string
  *                 description: List of reference numbers for mails to dispatch.
- *                 example: ["REF123456", "REF789101"]
+ *                 example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
  *     responses:
  *       200:
  *         description: Mails dispatched successfully.
@@ -205,12 +279,12 @@ router.post(
  *     tags:
  *       - Mail
  *     parameters:
- *       - in: query
- *         name: ref
+ *       - in: params
+ *         name: mailId
  *         required: true
  *         schema:
  *           type: string
- *         description: The reference number of the mail.
+ *         description: The id of the mail.
  *     requestBody:
  *       required: true
  *       content:
@@ -265,8 +339,8 @@ router.post(
  * @swagger
  * /api/mails/{mailId}:
  *   get:
- *     summary: Get mail by reference number
- *     description: Retrieves mail details and logs using a unique reference number.
+ *     summary: Get mail by mail id
+ *     description: Retrieves mail details using a unique mail id.
  *     tags:
  *       - Mail
  *     parameters:
@@ -275,7 +349,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
- *         description: MailId of the mail.
+ *         description: The id of the mail.
  *     responses:
  *       200:
  *         description: Mail and log details retrieved successfully.
@@ -290,10 +364,6 @@ router.post(
  *                   example: "Mail and mail log retrieved"
  *                 mail:
  *                   $ref: '#/components/schemas/Mail'
- *                 mailLogs:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/MailLog'
  *       404:
  *         description: Mail not found.
  *         content:
@@ -307,6 +377,77 @@ router.post(
  *                   example: "Mail not found"
  */
 router.get("/:id", asyncHandler(getMailById));
+
+/**
+ * @swagger
+ * /mails/{id}/logs:
+ *   get:
+ *     summary: Get mail logs for a specific mail by ID
+ *     description: Retrieves the logs for a specific mail, paginated by `start` and `limit`.
+ *     tags:
+ *       - Mail Logs
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID of the mail.
+ *       - in: query
+ *         name: start
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The starting index for the pagination (default is 1).
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of logs to retrieve per page (default is 10).
+ *     responses:
+ *       200:
+ *         description: Mail logs retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Maillogs retrieved"
+ *                 mailLogs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/MailLog'
+ *                 meta:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                       example: 25
+ *                     start:
+ *                       type: integer
+ *                       example: 1
+ *                     end:
+ *                       type: integer
+ *                       example: 10
+ *       404:
+ *         description: No mail found with the provided ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No mail with id provided"
+ *       500:
+ *         description: Internal server error.
+ */
+router.get("/:id/logs", asyncHandler(getMailLogsForMailById));
 
 const mailEndpoint: Endpoint = {
   path: "/mails",

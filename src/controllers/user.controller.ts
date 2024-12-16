@@ -55,12 +55,9 @@ async function getDriverById(req: Request, res: Response) {
     return;
   }
 
-  const driverMails = await MailRepository.find({ where: { driverId } });
-
   res.status(200).json({
     message: "Driver details retrieved",
     driver,
-    mails: driverMails,
   });
 }
 
@@ -100,6 +97,9 @@ async function addNewDriver(req: Request, res: Response) {
 
 async function getAllMailsForDriver(req: Request, res: Response) {
   const { id: driverId } = req.params;
+  const { start = 1, limit = 10 } = req.query;
+  const startNumber = parseInt(start as string, 10);
+  const pageSize = parseInt(limit as string, 10);
 
   const driver = await UserRepository.findOne({ where: { userId: driverId } });
   if (!driver) {
@@ -109,11 +109,21 @@ async function getAllMailsForDriver(req: Request, res: Response) {
     return;
   }
 
-  const driverMails = await MailRepository.find({ where: { driverId } });
+  const [driverMails, totalDriverMails] = await MailRepository.findAndCount({
+    where: { driverId },
+    skip: startNumber - 1,
+    take: pageSize,
+  });
+  const end = Math.min(totalDriverMails, startNumber + pageSize - 1);
 
   res.status(200).json({
     message: "All mails for driver retrieved",
     driverMails,
+    meta: {
+      total: totalDriverMails,
+      start: startNumber,
+      end,
+    },
   });
 }
 
