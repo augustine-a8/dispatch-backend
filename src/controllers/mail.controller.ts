@@ -176,6 +176,7 @@ async function receiveMail(req: Request, res: Response) {
   mail.receipientSignatureUrl = receipientSignatureUrl;
   mail.receipientContact = receipientContact;
   mail.status = MailStatus.DELIVERED;
+  mail.receivedAt = new Date();
   const updatedMail = await mail.save();
 
   const mailLog = new MailLog();
