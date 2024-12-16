@@ -385,7 +385,7 @@ router.get("/:id", asyncHandler(getMailById));
  *     summary: Get mail logs for a specific mail by ID
  *     description: Retrieves the logs for a specific mail, paginated by `start` and `limit`.
  *     tags:
- *       - Mail Logs
+ *       - Mail
  *     parameters:
  *       - in: path
  *         name: id

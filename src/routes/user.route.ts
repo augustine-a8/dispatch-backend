@@ -50,7 +50,7 @@ router.get("/", checkAuthentication, asyncHandler(getAllDrivers));
  *     summary: Add a new driver
  *     description: Creates a new driver in the system. Automatically generates a username and password for the driver.
  *     tags:
- *       - Drivers
+ *       - Driver
  *     requestBody:
  *       required: true
  *       content:
@@ -115,7 +115,7 @@ router.post(
  *     summary: Get all mails for a specific driver
  *     description: Retrieves all mails assigned to a specific driver, with optional pagination.
  *     tags:
- *       - Drivers
+ *       - Driver
  *     parameters:
  *       - in: path
  *         name: id
@@ -196,7 +196,7 @@ router.get(
  *     summary: Get driver details by ID
  *     description: Retrieves the details of a driver using their unique ID.
  *     tags:
- *       - Drivers
+ *       - Driver
  *     parameters:
  *       - in: path
  *         name: id
