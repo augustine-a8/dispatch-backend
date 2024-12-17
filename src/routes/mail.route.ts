@@ -23,15 +23,45 @@ const router = Router();
 
 /**
  * @swagger
- * /api/mails:
+ * /mail:
  *   get:
- *     summary: Get all mail records
- *     description: Retrieves all mail records from the database with additional metadata.
+ *     summary: Get all mails
+ *     description: Retrieves all mail records with pagination and optional filters for search term, start date, and end date. Results can be filtered by organization, addressee, reference number, or date range.
  *     tags:
  *       - Mail
+ *     parameters:
+ *       - in: query
+ *         name: start
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *           description: The starting index of the records to retrieve.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           description: The maximum number of records to retrieve.
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           description: A search term to filter mails by organization, addressee, or reference number.
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *           description: The start date for filtering mails (inclusive).
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *           description: The end date for filtering mails (inclusive).
  *     responses:
  *       200:
- *         description: A list of mail records along with metadata.
+ *         description: A list of mails retrieved successfully.
  *         content:
  *           application/json:
  *             schema:
@@ -39,40 +69,27 @@ const router = Router();
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Description of the operation outcome.
  *                   example: "All mails retrieved"
  *                 mails:
  *                   type: array
- *                   description: Array of mail records.
  *                   items:
- *                     $ref: '#/components/schemas/Mail' # Reference the Mail schema
+ *                     $ref: '#/components/schemas/Mail'
  *                 meta:
  *                   type: object
- *                   description: Pagination metadata.
  *                   properties:
- *                     total:
- *                       type: integer
- *                       description: Total number of records.
- *                       example: 100
  *                     start:
  *                       type: integer
- *                       description: Starting index of the records.
  *                       example: 1
  *                     end:
  *                       type: integer
- *                       description: Ending index of the records.
  *                       example: 10
+ *                     total:
+ *                       type: integer
+ *                       example: 50
+ *       400:
+ *         description: Invalid query parameters.
  *       500:
  *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   description: Error message.
- *                   example: "Error fetching mails"
  */
 router.get("/", checkAuthentication, isAdmin, asyncHandler(getAllMails));
 
@@ -86,12 +103,17 @@ router.get("/", checkAuthentication, isAdmin, asyncHandler(getAllMails));
  *       - Mail
  *     parameters:
  *       - in: query
- *         name: date
- *         required: true
+ *         name: from
  *         schema:
  *           type: string
  *           format: date
- *         description: The date for which the mail overview is retrieved (YYYY-MM-DD).
+ *           description: The start date for filtering mails (inclusive).
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *           description: The end date for filtering mails (inclusive).
  *     responses:
  *       200:
  *         description: Successfully retrieved the mail overview.

@@ -5,15 +5,16 @@ import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
 import { MailStatus } from "../types/mail";
 import { Between, ILike } from "typeorm";
+import { getToday } from "../lib/util";
 
 const MailRepository = AppDataSource.getRepository(Mail);
 const MailLogRepository = AppDataSource.getRepository(MailLog);
 const UserRepository = AppDataSource.getRepository(User);
 
 async function getMailOverview(req: Request, res: Response) {
-  const { date = "" } = req.query;
-  const startDate = new Date(`${date}T00:00:00.000Z`);
-  const endDate = new Date(`${date}T23:59:59.999Z`);
+  const { from = getToday(), to = getToday() } = req.query;
+  const startDate = new Date(`${from}T00:00:00.000Z`);
+  const endDate = new Date(`${to}T23:59:59.999Z`);
 
   const all = await MailRepository.find({
     where: { date: Between(new Date(startDate), new Date(endDate)) },
@@ -82,16 +83,34 @@ async function addNewMail(req: Request, res: Response) {
 }
 
 async function getAllMails(req: Request, res: Response) {
-  const { start = 1, limit = 10, search = "" } = req.query;
+  const {
+    start = 1,
+    limit = 10,
+    search = "",
+    from = getToday(),
+    to = getToday(),
+  } = req.query;
   const startNumber = parseInt(start as string, 10);
   const pageSize = parseInt(limit as string, 10);
   const searchTerm = search as string;
 
+  const startDate = new Date(`${from}T00:00:00.000Z`);
+  const endDate = new Date(`${to}T23:59:59.999Z`);
+
   const [mails, total] = await MailRepository.findAndCount({
     where: [
-      { organization: ILike(`%${searchTerm}%`) },
-      { addressee: ILike(`%${search}%`) },
-      { referenceNumber: ILike(`%${search}%`) },
+      {
+        organization: ILike(`%${searchTerm}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+      {
+        addressee: ILike(`%${search}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+      {
+        referenceNumber: ILike(`%${search}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
     ],
     relations: {
       driver: true,
