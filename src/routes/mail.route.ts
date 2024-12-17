@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addNewMail,
   dispatchMail,
+  editMail,
   getAllMails,
   getMailById,
   getMailLogsForMailById,
@@ -11,6 +12,7 @@ import {
 import {
   addNewMailSchema,
   dispatchMailSchema,
+  editMailSchema,
   receiveMailSchema,
 } from "../validations/mail.validation";
 import { checkAuthentication } from "../middleware/checkAuth";
@@ -398,7 +400,76 @@ router.post(
  *                   description: Error message.
  *                   example: "Mail not found"
  */
-router.get("/:id", asyncHandler(getMailById));
+router.get("/:id", checkAuthentication, asyncHandler(getMailById));
+
+/**
+ * @swagger
+ * /mail/{id}:
+ *   put:
+ *     summary: Edit a mail
+ *     description: Updates the details of an existing mail by its ID. Only provided fields will be updated.
+ *     tags:
+ *       - Mail
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the mail to edit.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               referenceNumber:
+ *                 type: string
+ *                 description: The updated reference number of the mail.
+ *                 example: "REF12345"
+ *               organization:
+ *                 type: string
+ *                 description: The updated organization associated with the mail.
+ *                 example: "Example Org"
+ *               addressees:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: List of updated addressees for the mail.
+ *                 example: ["John Doe", "Jane Smith"]
+ *     responses:
+ *       200:
+ *         description: Mail updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Mail updated successfully"
+ *                 mail:
+ *                   $ref: '#/components/schemas/Mail'
+ *       404:
+ *         description: Mail not found with the provided ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No mail with id provided"
+ *       500:
+ *         description: Internal server error.
+ */
+router.put(
+  "/:id",
+  checkAuthentication,
+  validateRequest(editMailSchema),
+  asyncHandler(editMail)
+);
 
 /**
  * @swagger

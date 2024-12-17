@@ -6,6 +6,12 @@ const addNewMailSchema = Joi.object({
   referenceNumber: Joi.string().required(),
 });
 
+const editMailSchema = Joi.object({
+  addressees: Joi.array().items(Joi.string().required()).min(1),
+  organization: Joi.string(),
+  referenceNumber: Joi.string(),
+});
+
 const dispatchMailSchema = Joi.object({
   driverId: Joi.string().uuid().required(),
   mailIds: Joi.array().items(Joi.string().uuid().required()).min(1).required(),
@@ -27,4 +33,5 @@ export {
   dispatchMailSchema,
   receiveMailSchema,
   addNewDriverSchema,
+  editMailSchema,
 };

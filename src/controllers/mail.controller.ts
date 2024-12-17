@@ -281,6 +281,41 @@ async function receiveMail(req: Request, res: Response) {
   });
 }
 
+async function editMail(req: Request, res: Response) {
+  const { id: mailId } = req.params;
+  const { referenceNumber, organization, addressees } = req.body;
+
+  const mail = await MailRepository.findOne({ where: { mailId } });
+  if (!mail) {
+    res.status(404).json({
+      message: "No mail with id provided",
+    });
+    return;
+  }
+
+  if (referenceNumber) {
+    mail.referenceNumber = referenceNumber;
+  }
+  if (organization) {
+    mail.organization = organization;
+  }
+  if (addressees) {
+    mail.addressee = (addressees as string[]).join(",");
+  }
+
+  const updatedMail = await mail.save();
+
+  const newMail = await MailRepository.findOne({
+    where: { mailId: updatedMail.mailId },
+    relations: { driver: true },
+  });
+
+  res.status(200).json({
+    message: "Mail update successfully",
+    mail: newMail,
+  });
+}
+
 export {
   addNewMail,
   getAllMails,
@@ -289,4 +324,5 @@ export {
   receiveMail,
   getMailOverview,
   getMailLogsForMailById,
+  editMail,
 };
