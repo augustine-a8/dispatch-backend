@@ -83,53 +83,83 @@ async function addNewMail(req: Request, res: Response) {
 }
 
 async function getAllMails(req: Request, res: Response) {
-  const {
-    start = 1,
-    limit = 10,
-    search = "",
-    from = getToday(),
-    to = getToday(),
-  } = req.query;
+  const { start = 1, limit = 10, search = "", from, to } = req.query;
   const startNumber = parseInt(start as string, 10);
   const pageSize = parseInt(limit as string, 10);
   const searchTerm = search as string;
 
-  const startDate = new Date(`${from}T00:00:00.000Z`);
-  const endDate = new Date(`${to}T23:59:59.999Z`);
+  if (from && to) {
+    const startDate = new Date(`${from}T00:00:00.000Z`);
+    const endDate = new Date(`${to}T23:59:59.999Z`);
 
-  const [mails, total] = await MailRepository.findAndCount({
-    where: [
-      {
-        organization: ILike(`%${searchTerm}%`),
-        date: Between(new Date(startDate), new Date(endDate)),
+    const [mails, total] = await MailRepository.findAndCount({
+      where: [
+        {
+          organization: ILike(`%${searchTerm}%`),
+          date: Between(new Date(startDate), new Date(endDate)),
+        },
+        {
+          addressee: ILike(`%${search}%`),
+          date: Between(new Date(startDate), new Date(endDate)),
+        },
+        {
+          referenceNumber: ILike(`%${search}%`),
+          date: Between(new Date(startDate), new Date(endDate)),
+        },
+      ],
+      relations: {
+        driver: true,
       },
-      {
-        addressee: ILike(`%${search}%`),
-        date: Between(new Date(startDate), new Date(endDate)),
-      },
-      {
-        referenceNumber: ILike(`%${search}%`),
-        date: Between(new Date(startDate), new Date(endDate)),
-      },
-    ],
-    relations: {
-      driver: true,
-    },
-    skip: startNumber - 1,
-    take: pageSize,
-  });
+      skip: startNumber - 1,
+      take: pageSize,
+    });
 
-  const end = Math.min(total, startNumber + pageSize - 1);
+    const end = Math.min(total, startNumber + pageSize - 1);
 
-  res.status(200).json({
-    message: "All mails retrieved",
-    mails,
-    meta: {
-      start: startNumber,
-      end,
-      total,
-    },
-  });
+    res.status(200).json({
+      message: "All mails retrieved",
+      mails,
+      meta: {
+        start: startNumber,
+        end,
+        total,
+      },
+    });
+  } else {
+    const startDate = new Date(`${from}T00:00:00.000Z`);
+    const endDate = new Date(`${to}T23:59:59.999Z`);
+
+    const [mails, total] = await MailRepository.findAndCount({
+      where: [
+        {
+          organization: ILike(`%${searchTerm}%`),
+        },
+        {
+          addressee: ILike(`%${search}%`),
+        },
+        {
+          referenceNumber: ILike(`%${search}%`),
+        },
+      ],
+      relations: {
+        driver: true,
+      },
+      skip: startNumber - 1,
+      take: pageSize,
+    });
+
+    const end = Math.min(total, startNumber + pageSize - 1);
+
+    res.status(200).json({
+      message: "All mails retrieved",
+      mails,
+      meta: {
+        start: startNumber,
+        end,
+        total,
+      },
+    });
+  }
 }
 
 async function getMailById(req: Request, res: Response) {
