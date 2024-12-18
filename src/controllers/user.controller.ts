@@ -82,6 +82,7 @@ async function addNewDriver(req: Request, res: Response) {
   driver.name = name;
   driver.contact = contact;
   driver.role = "driver";
+  driver.unhashedPassword = generatedPassword;
   driver.username = generatedUsername;
   driver.password = hashPassword(generatedPassword);
   const savedDriver = await UserRepository.save(driver);

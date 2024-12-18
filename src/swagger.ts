@@ -92,6 +92,7 @@ export const swaggerOptions: Options = {
             name: { type: "string" },
             contact: { type: "string" },
             role: { type: "string", enum: ["admin", "driver"] },
+            unhashedPassword: { type: "string" },
           },
         },
         MailLog: {

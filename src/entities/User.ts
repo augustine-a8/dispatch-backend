@@ -21,6 +21,9 @@ export class User extends BaseEntity {
   @Column({ type: "varchar", length: 255, unique: true, nullable: false })
   username: string;
 
+  @Column({ type: "varchar", default: "" })
+  unhashedPassword: string;
+
   @Column({ type: "text" })
   password: string;
 
