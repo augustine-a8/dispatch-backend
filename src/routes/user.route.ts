@@ -117,29 +117,35 @@ router.post(
  *     tags:
  *       - Driver
  *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID of the driver.
- *         example: "123e4567-e89b-12d3-a456-426614174000"
  *       - in: query
  *         name: start
- *         required: false
  *         schema:
  *           type: integer
- *           description: The starting index for the paginated results.
- *           example: 1
- *         description: Defaults to 1 if not provided.
+ *           default: 1
+ *           description: The starting index of the records to retrieve.
  *       - in: query
  *         name: limit
- *         required: false
  *         schema:
  *           type: integer
- *           description: The maximum number of results per page.
- *           example: 10
- *         description: Defaults to 10 if not provided.
+ *           default: 10
+ *           description: The maximum number of records to retrieve.
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *           description: A search term to filter mails by organization, addressee, or reference number.
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           format: date
+ *           description: The start date for filtering mails (inclusive).
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           format: date
+ *           description: The end date for filtering mails (inclusive).
  *     responses:
  *       200:
  *         description: Mails retrieved successfully for the specified driver.
