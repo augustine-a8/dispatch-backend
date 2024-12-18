@@ -3,9 +3,14 @@ import { Response, Request } from "express";
 
 import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
-import { ILike } from "typeorm";
+import { Between, ILike } from "typeorm";
 import { MailStatus } from "../types/mail";
-import { generatePassword, generateUsername, hashPassword } from "../lib/util";
+import {
+  generatePassword,
+  generateUsername,
+  getToday,
+  hashPassword,
+} from "../lib/util";
 
 const MailRepository = AppDataSource.getRepository(Mail);
 const UserRepository = AppDataSource.getRepository(User);
@@ -98,9 +103,20 @@ async function addNewDriver(req: Request, res: Response) {
 
 async function getAllMailsForDriver(req: Request, res: Response) {
   const { id: driverId } = req.params;
-  const { start = 1, limit = 10 } = req.query;
+  const {
+    start = 1,
+    limit = 10,
+    search = "",
+    from = getToday(),
+    to = getToday(),
+  } = req.query;
+
   const startNumber = parseInt(start as string, 10);
   const pageSize = parseInt(limit as string, 10);
+  const searchTerm = search as string;
+
+  const startDate = new Date(`${from}T00:00:00.000Z`);
+  const endDate = new Date(`${to}T23:59:59.999Z`);
 
   const driver = await UserRepository.findOne({ where: { userId: driverId } });
   if (!driver) {
@@ -111,7 +127,23 @@ async function getAllMailsForDriver(req: Request, res: Response) {
   }
 
   const [driverMails, totalDriverMails] = await MailRepository.findAndCount({
-    where: { driverId },
+    where: [
+      {
+        driverId,
+        organization: ILike(`%${searchTerm}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+      {
+        driverId,
+        referenceNumber: ILike(`%${searchTerm}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+      {
+        driverId,
+        addressee: ILike(`%${searchTerm}%`),
+        date: Between(new Date(startDate), new Date(endDate)),
+      },
+    ],
     skip: startNumber - 1,
     take: pageSize,
   });
