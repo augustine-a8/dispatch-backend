@@ -270,6 +270,8 @@ async function dispatchMail(req: Request, res: Response) {
   res.status(200).json({
     message: "Dispatched mails",
     failedDispatches,
+    successfulDispatches,
+    driver,
   });
 }
 

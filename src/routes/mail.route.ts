@@ -274,6 +274,20 @@ router.post(
  *                   type: string
  *                   description: Success message.
  *                   example: "Mails successfully dispatched"
+ *                 failedDispatches:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of mail ids of mails that failed dispatches
+ *                   example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
+ *                 successfulDispatches:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of mail ids of mails that were dispatched successfully
+ *                   example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
+ *                 driver:
+ *                   $ref: '#/components/schemas/User'
  *       404:
  *         description: Driver with the provided ID not found.
  *         content:

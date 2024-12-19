@@ -17,14 +17,14 @@ async function login(req: Request, res: Response) {
   const user = await UserRepository.findOneBy({ username });
   if (!user) {
     res.status(404).json({
-      message: "Username not found",
+      message: "Incorrect login details",
     });
     return;
   }
 
   if (!verifyPassword(password, user.password)) {
     res.status(403).json({
-      message: "Incorrect password",
+      message: "Incorrect login details",
     });
     return;
   }
