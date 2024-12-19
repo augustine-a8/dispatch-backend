@@ -276,7 +276,7 @@ async function dispatchMail(req: Request, res: Response) {
 }
 
 async function receiveMail(req: Request, res: Response) {
-  const { mailId } = req.params;
+  const { id: mailId } = req.params;
   const { receipient, receipientContact, receipientSignatureUrl } = req.body;
 
   const mail = await MailRepository.findOne({
