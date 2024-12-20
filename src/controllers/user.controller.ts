@@ -252,7 +252,7 @@ async function deleteUsers(req: Request, res: Response) {
 
   res.status(200).json({
     message: "Users deleted successfully.",
-    deletedUserIds: usersToDelete.map((user) => user.id),
+    deletedUserIds: usersToDelete.map((user) => user.userId),
   });
 }
 
