@@ -374,7 +374,7 @@ router.get("/:id", checkAuthentication, isAdmin, asyncHandler(getDriverById));
 router.put("/:id", checkAuthentication, asyncHandler(editUser));
 
 const driverEndpoint: Endpoint = {
-  path: "/users",
+  path: "/drivers",
   router,
 };
 
