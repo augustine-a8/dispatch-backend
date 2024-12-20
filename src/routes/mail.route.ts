@@ -478,7 +478,7 @@ router.get("/:id", checkAuthentication, asyncHandler(getMailById));
 /**
  * @swagger
  * /mail/{id}:
- *   patch:
+ *   put:
  *     summary: Edit a mail
  *     description: Updates the details of an existing mail by its ID. Only provided fields will be updated.
  *     tags:
@@ -537,7 +537,7 @@ router.get("/:id", checkAuthentication, asyncHandler(getMailById));
  *       500:
  *         description: Internal server error.
  */
-router.patch(
+router.put(
   "/:id",
   checkAuthentication,
   validateRequest(editMailSchema),
