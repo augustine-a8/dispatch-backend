@@ -4,7 +4,7 @@ import { Response, Request } from "express";
 import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
 import { MailStatus } from "../types/mail";
-import { Between, ILike } from "typeorm";
+import { Between, ILike, In } from "typeorm";
 import { getToday } from "../lib/util";
 
 const MailRepository = AppDataSource.getRepository(Mail);
@@ -348,6 +348,24 @@ async function editMail(req: Request, res: Response) {
   });
 }
 
+async function deleteMail(req: Request, res: Response) {
+  const { ids } = req.body;
+
+  const mailsToDelete = await MailRepository.findBy({ id: In(ids) });
+
+  if (mailsToDelete.length === 0) {
+    res.status(404).json({ message: "No mails found with the provided IDs." });
+    return;
+  }
+
+  await MailRepository.remove(mailsToDelete);
+
+  res.status(200).json({
+    message: "Mails deleted successfully.",
+    deletedUserIds: mailsToDelete.map((user) => user.id),
+  });
+}
+
 export {
   addNewMail,
   getAllMails,
@@ -357,4 +375,5 @@ export {
   getMailOverview,
   getMailLogsForMailById,
   editMail,
+  deleteMail,
 };

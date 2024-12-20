@@ -3,7 +3,7 @@ import { Response, Request } from "express";
 
 import { User, Mail, MailLog } from "../entities";
 import { AppDataSource } from "../dataSource";
-import { Between, ILike } from "typeorm";
+import { Between, ILike, In } from "typeorm";
 import { MailStatus } from "../types/mail";
 import {
   generatePassword,
@@ -198,4 +198,64 @@ async function getAllMailsForDriver(req: Request, res: Response) {
   }
 }
 
-export { getAllDrivers, getAllMailsForDriver, addNewDriver, getDriverById };
+async function editUser(req: Request, res: Response) {
+  const { id } = req.params;
+  const { name, contact, username, password } = req.body;
+
+  const user = await UserRepository.findOne({ where: { userId: id } });
+  if (!user) {
+    res.status(404).json({
+      message: "No user with id",
+    });
+    return;
+  }
+
+  if (name) {
+    user.name = name;
+  }
+  if (contact) {
+    user.contact = contact;
+  }
+  if (username) {
+    user.username = username;
+  }
+  if (password) {
+    user.unhashedPassword = password;
+    user.password = hashPassword(password);
+  }
+
+  const updatedUser = await user.save();
+  const { password: p, ...userDetails } = updatedUser;
+
+  res.status(200).json({
+    message: "User details updated",
+    user: userDetails,
+  });
+}
+
+async function deleteUsers(req: Request, res: Response) {
+  const { ids } = req.body;
+
+  const usersToDelete = await UserRepository.findBy({ id: In(ids) });
+
+  if (usersToDelete.length === 0) {
+    res.status(404).json({ message: "No users found with the provided IDs." });
+    return;
+  }
+
+  await UserRepository.remove(usersToDelete);
+
+  res.status(200).json({
+    message: "Users deleted successfully.",
+    deletedUserIds: usersToDelete.map((user) => user.id),
+  });
+}
+
+export {
+  getAllDrivers,
+  getAllMailsForDriver,
+  addNewDriver,
+  getDriverById,
+  editUser,
+  deleteUsers,
+};

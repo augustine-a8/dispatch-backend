@@ -8,6 +8,7 @@ import {
   getMailLogsForMailById,
   getMailOverview,
   receiveMail,
+  deleteMail,
 } from "../controllers/mail.controller";
 import {
   addNewMailSchema,
@@ -310,6 +311,64 @@ router.post(
 
 /**
  * @swagger
+ * /mails:
+ *   delete:
+ *     summary: Delete mails by IDs
+ *     description: Deletes multiple mails based on their IDs.
+ *     tags:
+ *       - Mail
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: An array of mail IDs to delete.
+ *                 example: ["123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001"]
+ *     responses:
+ *       200:
+ *         description: Mails deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Mails deleted successfully."
+ *                 deletedUserIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of IDs of the deleted mails.
+ *                   example: ["123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001"]
+ *       404:
+ *         description: No mails found with the provided IDs.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No mails found with the provided IDs."
+ *       500:
+ *         description: Internal server error.
+ */
+router.delete(
+  "/delete",
+  checkAuthentication,
+  isAdmin,
+  asyncHandler(deleteMail)
+);
+
+/**
+ * @swagger
  * /api/mails/{mailId}/receive:
  *   post:
  *     summary: Mark a mail as received
@@ -419,7 +478,7 @@ router.get("/:id", checkAuthentication, asyncHandler(getMailById));
 /**
  * @swagger
  * /mail/{id}:
- *   put:
+ *   patch:
  *     summary: Edit a mail
  *     description: Updates the details of an existing mail by its ID. Only provided fields will be updated.
  *     tags:
@@ -478,7 +537,7 @@ router.get("/:id", checkAuthentication, asyncHandler(getMailById));
  *       500:
  *         description: Internal server error.
  */
-router.put(
+router.patch(
   "/:id",
   checkAuthentication,
   validateRequest(editMailSchema),

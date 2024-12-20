@@ -2,6 +2,8 @@ import { Router } from "express";
 import { asyncHandler } from "../lib/asyncWrapper";
 import {
   addNewDriver,
+  deleteUsers,
+  editUser,
   getAllDrivers,
   getAllMailsForDriver,
   getDriverById,
@@ -197,6 +199,64 @@ router.get(
 
 /**
  * @swagger
+ * /users:
+ *   delete:
+ *     summary: Delete users by IDs
+ *     description: Deletes multiple users based on their IDs.
+ *     tags:
+ *       - User
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: An array of user IDs to delete.
+ *                 example: ["123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001"]
+ *     responses:
+ *       200:
+ *         description: Users deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Users deleted successfully."
+ *                 deletedUserIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: List of IDs of the deleted users.
+ *                   example: ["123e4567-e89b-12d3-a456-426614174000", "123e4567-e89b-12d3-a456-426614174001"]
+ *       404:
+ *         description: No users found with the provided IDs.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No users found with the provided IDs."
+ *       500:
+ *         description: Internal server error.
+ */
+router.delete(
+  "/delete",
+  checkAuthentication,
+  isAdmin,
+  asyncHandler(deleteUsers)
+);
+
+/**
+ * @swagger
  * /api/drivers/{id}:
  *   get:
  *     summary: Get driver details by ID
@@ -238,6 +298,85 @@ router.get(
  *         description: Internal server error.
  */
 router.get("/:id", checkAuthentication, isAdmin, asyncHandler(getDriverById));
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Edit a user
+ *     description: Updates the details of an existing user by their ID. Only provided fields will be updated.
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the user to edit.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The updated name of the user.
+ *                 example: "John Doe"
+ *               contact:
+ *                 type: string
+ *                 description: The updated contact information for the user.
+ *                 example: "+123456789"
+ *               username:
+ *                 type: string
+ *                 description: The updated username of the user.
+ *                 example: "johndoe123"
+ *               password:
+ *                 type: string
+ *                 description: The updated password for the user.
+ *                 example: "SecurePass123"
+ *     responses:
+ *       200:
+ *         description: User details updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User details updated"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                     name:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     contact:
+ *                       type: string
+ *                       example: "+123456789"
+ *                     username:
+ *                       type: string
+ *                       example: "johndoe123"
+ *       404:
+ *         description: User not found with the provided ID.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "No user with id"
+ *       500:
+ *         description: Internal server error.
+ */
+router.put("/:id", checkAuthentication, asyncHandler(editUser));
 
 const driverEndpoint: Endpoint = {
   path: "/drivers",
