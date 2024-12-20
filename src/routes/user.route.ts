@@ -9,7 +9,7 @@ import {
   getDriverById,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middleware";
-import { addNewDriverSchema } from "../validations";
+import { addNewDriverSchema, deleteDriverSchema } from "../validations";
 import { Endpoint } from "../types";
 import { checkAuthentication } from "../middleware/checkAuth";
 import { isAdmin } from "../middleware/isAdmin";
@@ -248,7 +248,13 @@ router.get(
  *       500:
  *         description: Internal server error.
  */
-router.delete("/", checkAuthentication, isAdmin, asyncHandler(deleteUsers));
+router.delete(
+  "/",
+  checkAuthentication,
+  isAdmin,
+  validateRequest(deleteDriverSchema),
+  asyncHandler(deleteUsers)
+);
 
 /**
  * @swagger

@@ -28,10 +28,15 @@ const addNewDriverSchema = Joi.object({
   contact: Joi.string().required(),
 });
 
+const deleteDriverSchema = Joi.object({
+  userIds: Joi.array().items(Joi.string().uuid().required()).min(1).required(),
+});
+
 export {
   addNewMailSchema,
   dispatchMailSchema,
   receiveMailSchema,
   addNewDriverSchema,
   editMailSchema,
+  deleteDriverSchema,
 };
