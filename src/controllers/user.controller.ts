@@ -241,7 +241,7 @@ async function editUser(req: Request, res: Response) {
 async function deleteUsers(req: Request, res: Response) {
   const { ids } = req.body;
 
-  const usersToDelete = await UserRepository.findBy({ id: In(ids) });
+  const usersToDelete = await UserRepository.findBy({ userId: In(ids) });
 
   if (usersToDelete.length === 0) {
     res.status(404).json({ message: "No users found with the provided IDs." });
