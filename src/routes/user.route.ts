@@ -23,7 +23,7 @@ const router = Router();
  *     summary: Get all drivers
  *     description: Retrieves a list of all drivers from the database.
  *     tags:
- *       - Driver
+ *       - User
  *     responses:
  *       200:
  *         description: Retrieved all drivers.
@@ -52,7 +52,7 @@ router.get("/", checkAuthentication, asyncHandler(getAllDrivers));
  *     summary: Add a new driver
  *     description: Creates a new driver in the system. Automatically generates a username and password for the driver.
  *     tags:
- *       - Driver
+ *       - User
  *     requestBody:
  *       required: true
  *       content:
@@ -117,7 +117,7 @@ router.post(
  *     summary: Get all mails for a specific driver
  *     description: Retrieves all mails assigned to a specific driver, with optional pagination.
  *     tags:
- *       - Driver
+ *       - User
  *     parameters:
  *       - in: query
  *         name: start
@@ -262,7 +262,7 @@ router.delete(
  *     summary: Get driver details by ID
  *     description: Retrieves the details of a driver using their unique ID.
  *     tags:
- *       - Driver
+ *       - User
  *     parameters:
  *       - in: path
  *         name: id
