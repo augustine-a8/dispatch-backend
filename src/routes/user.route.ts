@@ -199,7 +199,7 @@ router.get(
 
 /**
  * @swagger
- * /users:
+ * api/drivers:
  *   delete:
  *     summary: Delete users by IDs
  *     description: Deletes multiple users based on their IDs.
@@ -248,12 +248,7 @@ router.get(
  *       500:
  *         description: Internal server error.
  */
-router.delete(
-  "/delete",
-  checkAuthentication,
-  isAdmin,
-  asyncHandler(deleteUsers)
-);
+router.delete("/", checkAuthentication, isAdmin, asyncHandler(deleteUsers));
 
 /**
  * @swagger
@@ -301,7 +296,7 @@ router.get("/:id", checkAuthentication, isAdmin, asyncHandler(getDriverById));
 
 /**
  * @swagger
- * /users/{id}:
+ * api/drivers/{id}:
  *   put:
  *     summary: Edit a user
  *     description: Updates the details of an existing user by their ID. Only provided fields will be updated.
@@ -379,7 +374,7 @@ router.get("/:id", checkAuthentication, isAdmin, asyncHandler(getDriverById));
 router.put("/:id", checkAuthentication, asyncHandler(editUser));
 
 const driverEndpoint: Endpoint = {
-  path: "/drivers",
+  path: "/users",
   router,
 };
 

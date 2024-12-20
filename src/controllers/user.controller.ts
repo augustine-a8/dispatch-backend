@@ -16,9 +16,9 @@ const MailRepository = AppDataSource.getRepository(Mail);
 const UserRepository = AppDataSource.getRepository(User);
 
 async function getAllDrivers(req: Request, res: Response) {
-  const { start = 1, limit = 10, search = "" } = req.query;
+  const { start = 1, limit, search = "" } = req.query;
   const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(limit as string, 10);
+  const pageSize = limit ? parseInt(limit as string, 10) : undefined;
   const searchTerm = search as string;
 
   const [drivers, total] = await UserRepository.findAndCount({
@@ -30,7 +30,7 @@ async function getAllDrivers(req: Request, res: Response) {
     take: pageSize,
   });
 
-  const end = Math.min(total, startNumber + pageSize - 1);
+  const end = pageSize ? Math.min(total, startNumber + pageSize - 1) : total;
 
   res.status(200).json({
     message: "retrieved all drivers",
@@ -103,10 +103,10 @@ async function addNewDriver(req: Request, res: Response) {
 
 async function getAllMailsForDriver(req: Request, res: Response) {
   const { id: driverId } = req.params;
-  const { start = 1, limit = 10, search = "", from, to } = req.query;
+  const { start = 1, limit, search = "", from, to } = req.query;
 
   const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(limit as string, 10);
+  const pageSize = limit ? parseInt(limit as string, 10) : undefined;
   const searchTerm = search as string;
 
   if (from && to) {
@@ -144,7 +144,10 @@ async function getAllMailsForDriver(req: Request, res: Response) {
       skip: startNumber - 1,
       take: pageSize,
     });
-    const end = Math.min(totalDriverMails, startNumber + pageSize - 1);
+
+    const end = pageSize
+      ? Math.min(totalDriverMails, startNumber + pageSize - 1)
+      : totalDriverMails;
 
     res.status(200).json({
       message: "All mails for driver retrieved",
@@ -184,7 +187,9 @@ async function getAllMailsForDriver(req: Request, res: Response) {
       skip: startNumber - 1,
       take: pageSize,
     });
-    const end = Math.min(totalDriverMails, startNumber + pageSize - 1);
+    const end = pageSize
+      ? Math.min(totalDriverMails, startNumber + pageSize - 1)
+      : totalDriverMails;
 
     res.status(200).json({
       message: "All mails for driver retrieved",

@@ -83,9 +83,9 @@ async function addNewMail(req: Request, res: Response) {
 }
 
 async function getAllMails(req: Request, res: Response) {
-  const { start = 1, limit = 10, search = "", from, to } = req.query;
+  const { start = 1, limit, search = "", from, to } = req.query;
   const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(limit as string, 10);
+  const pageSize = limit ? parseInt(limit as string, 10) : undefined;
   const searchTerm = search as string;
 
   if (from && to) {
@@ -114,7 +114,7 @@ async function getAllMails(req: Request, res: Response) {
       take: pageSize,
     });
 
-    const end = Math.min(total, startNumber + pageSize - 1);
+    const end = pageSize ? Math.min(total, startNumber + pageSize - 1) : total;
 
     res.status(200).json({
       message: "All mails retrieved",
@@ -148,7 +148,7 @@ async function getAllMails(req: Request, res: Response) {
       take: pageSize,
     });
 
-    const end = Math.min(total, startNumber + pageSize - 1);
+    const end = pageSize ? Math.min(total, startNumber + pageSize - 1) : total;
 
     res.status(200).json({
       message: "All mails retrieved",
@@ -187,9 +187,9 @@ async function getMailById(req: Request, res: Response) {
 
 async function getMailLogsForMailById(req: Request, res: Response) {
   const { id: mailId } = req.params;
-  const { start = 1, limit = 10 } = req.query;
+  const { start = 1, limit } = req.query;
   const startNumber = parseInt(start as string, 10);
-  const pageSize = parseInt(limit as string, 10);
+  const pageSize = limit ? parseInt(limit as string, 10) : undefined;
 
   const mail = await MailRepository.findOne({
     where: { mailId },
@@ -213,7 +213,9 @@ async function getMailLogsForMailById(req: Request, res: Response) {
     take: pageSize,
     skip: startNumber - 1,
   });
-  const end = Math.min(totalMailLogs, startNumber + pageSize - 1);
+  const end = pageSize
+    ? Math.min(totalMailLogs, startNumber + pageSize - 1)
+    : totalMailLogs;
 
   res.status(200).json({
     message: "Maillogs retrieved",

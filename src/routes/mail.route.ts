@@ -242,10 +242,10 @@ router.post(
  * @swagger
  * /api/mails/dispatch:
  *   post:
- *     summary: Dispatch mails to a driver
- *     description: Assigns mails to a driver using their ID and a list of reference numbers. Updates mail status to dispatched.
+ *     summary: Assign mails to a driver
+ *     description: Assigns a list of mails to a specific driver by their IDs.
  *     tags:
- *       - Mail
+ *       - Mails
  *     requestBody:
  *       required: true
  *       content:
@@ -255,17 +255,17 @@ router.post(
  *             properties:
  *               driverId:
  *                 type: string
- *                 description: ID of the driver to whom mails will be dispatched.
- *                 example: "driver123"
+ *                 description: The ID of the driver to whom mails will be assigned.
+ *                 example: "driver-12345"
  *               mailIds:
  *                 type: array
+ *                 description: An array of mail IDs to assign to the driver.
  *                 items:
  *                   type: string
- *                 description: List of reference numbers for mails to dispatch.
- *                 example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
+ *                 example: ["mail-123", "mail-456", "mail-789"]
  *     responses:
  *       200:
- *         description: Mails dispatched successfully.
+ *         description: Successfully assigned mails to the driver.
  *         content:
  *           application/json:
  *             schema:
@@ -273,24 +273,15 @@ router.post(
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Success message.
- *                   example: "Mails successfully dispatched"
- *                 failedDispatches:
+ *                   example: "Mails successfully assigned to the driver."
+ *                 assignedMailIds:
  *                   type: array
+ *                   description: List of mail IDs that were assigned to the driver.
  *                   items:
  *                     type: string
- *                   description: List of mail ids of mails that failed dispatches
- *                   example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
- *                 successfulDispatches:
- *                   type: array
- *                   items:
- *                     type: string
- *                   description: List of mail ids of mails that were dispatched successfully
- *                   example: ["550e8400-e29b-41d4-a716-446655440000", "9a8b7c6d-5e4f-3a2b-1c0d-ffeeddccbbaa"]
- *                 driver:
- *                   $ref: '#/components/schemas/User'
+ *                   example: ["mail-123", "mail-456"]
  *       404:
- *         description: Driver with the provided ID not found.
+ *         description: Driver or mails not found.
  *         content:
  *           application/json:
  *             schema:
@@ -298,8 +289,17 @@ router.post(
  *               properties:
  *                 message:
  *                   type: string
- *                   description: Error message.
- *                   example: "Driver with the provided ID not found"
+ *                   example: "No driver with id provided"
+ *       400:
+ *         description: All mails are already assigned to a driver.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "All provided mails are already assigned to a driver."
  */
 router.post(
   "/dispatch",
